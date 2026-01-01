@@ -327,30 +327,4 @@ function acrexttNotifier:notifyError(message, duration)
 	return notify(message, duration, "error")
 end
 
-acrexttNotifier:notifyInfo(`Testing info`, 3)
-acrexttNotifier:notifySuccess(`Testing Success`, 3)
-acrexttNotifier:notifyWarning(`Testing Warning`, 3)
-acrexttNotifier:notifyError(`Testing Error`, 3)
-
-task.wait(1)
-
-acrexttNotifier:notifyInfo(`Testing info`, 3)
-acrexttNotifier:notifySuccess(`Testing Success`, 3)
-acrexttNotifier:notifyWarning(`Testing Warning`, 3)
-acrexttNotifier:notifyError(`Testing Error`, 3)
-
-task.wait(1)
-
-acrexttNotifier:notifyInfo(`Testing info`, 3)
-acrexttNotifier:notifySuccess(`Testing Success`, 3)
-acrexttNotifier:notifyWarning(`Testing Warning`, 3)
-acrexttNotifier:notifyError(`Testing Error`, 3)
-
-task.wait(1)
-
-acrexttNotifier:notifyInfo(`Testing info`, 3)
-acrexttNotifier:notifySuccess(`Testing Success`, 3)
-acrexttNotifier:notifyWarning(`Testing Warning`, 3)
-acrexttNotifier:notifyError(`Testing Error`, 3)
-
 return acrexttNotifier
