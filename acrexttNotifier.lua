@@ -141,9 +141,9 @@ local function notify(message, duration, notificationType)
 	Indicator.Parent = Background
 	
 	local iconMap = {
-		info = "??",
-		success = "?",
-		warning = "??",
+		info = "ℹ️",
+		success = "✓",
+		warning = "⚠️",
 		error = "X"
 	}
 	
@@ -328,3 +328,4 @@ function acrexttNotifier:notifyError(message, duration)
 end
 
 return acrexttNotifier
+
