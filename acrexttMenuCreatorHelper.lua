@@ -7,8 +7,6 @@ local Player = Players.LocalPlayer
 local PlayerGui = Player.PlayerGui
 
 local unloading = false
-local isMenuOpen = false
-local currentConfiguration = nil
 
 local acrexttMenu = {}
 local connections = {}
@@ -931,6 +929,7 @@ function acrexttMenu:init()
 end
 
 return acrexttMenu
+
 
 
 
