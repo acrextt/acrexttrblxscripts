@@ -16,7 +16,6 @@ local acrexttConfigurator = loadstring(game:HttpGet(HTTPLOADSTRINGLINKS[2]))()
 
 local unloading = false
 local isMenuOpen = false
-local inputs = nil
 local currentConfiguration = nil
 
 local acrexttMenu = {}
@@ -55,7 +54,7 @@ function acrexttMenu:createSectionTitle(title : string, parent : Instance) : Fra
 
 	local SectionTitle = Instance.new("TextLabel")
 	SectionTitle.Name = "Title"
-	SectionTitle.Text = "• " .. title
+	SectionTitle.Text = "â€¢ " .. title
 	SectionTitle.Size = UDim2.new(1, 0, 0, 30)
 	SectionTitle.BackgroundTransparency = 1
 	SectionTitle.TextColor3 = Color3.fromRGB(200, 170, 240)
@@ -705,6 +704,19 @@ function acrexttMenu:toggleMenu()
 	end
 end
 
+function acrexttMenu:updateInput(bindName : string, newBind : Enum)
+	if not bindName or not newBind then
+		acrexttNotifier:notifyWarning(`bindName or newBind variable not given.`, 2)
+		return
+	end
+
+	if default_keybinds[bindName] then
+		default_keybinds[bindName] = newBind
+	else
+		warn(`Failed to set {newBind} bind {bindName} doesn't exist in keybinds.`)
+	end
+end
+
 function acrexttMenu:init()
 	if PlayerGui:FindFirstChild("AcrexttMenu") then
 		acrexttNotifier:notifyWarning(`Your trying to initialize when acrextt menu exists already. Press delete to unload menu and reinitialize.`, 3)
@@ -898,10 +910,6 @@ function acrexttMenu:init()
 	ContentPadding.PaddingBottom = UDim.new(0, 8)
 	ContentPadding.Parent = ScrollFrame
 	
-	local config = acrexttConfigurator:loadConfiguration()
-	currentConfiguration = config
-	inputs = config.keybinds
-	
 	local dragging = false
 	local dragInput, dragStart, startPos
 
@@ -954,7 +962,7 @@ function acrexttMenu:init()
 	end)
 
 	connections.createInputs = UserInputService.InputBegan:Connect(function(i, gpe)
-		if i.KeyCode == inputs.openHubInput then
+		if i.KeyCode == default_keybinds.openHubInput or i.UserInputType == default_keybinds.openHubInput then
 			acrexttMenu:toggleMenu()
 		end
 	end)
