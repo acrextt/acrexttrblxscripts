@@ -6,12 +6,10 @@ local UserInputService = game:GetService("UserInputService")
 local Player = Players.LocalPlayer
 local PlayerGui = Player.PlayerGui
 
-local unloading = false
-
 local acrexttMenu = {}
 local connections = {}
 
-local function clearConnections()
+function acrexttMenu.clearConnections()
 	for _, connection in connections do
 		if connection then
 			connection:Disconnect()
@@ -652,35 +650,6 @@ function acrexttMenu:createTab(tabName : string, icon : string, parent : Instanc
 	return TabButton
 end
 
-function acrexttMenu:unload(reinitialize : boolean)
-	if unloading then return end
-	unloading = true
-	if PlayerGui:FindFirstChild("AcrexttMenu") then
-		PlayerGui:FindFirstChild("AcrexttMenu"):Destroy()
-		isMenuOpen = false
-		if reinitialize then
-			acrexttMenu:init()
-		end
-	else
-		warn(`Failed to unload AcrexttMenu`)
-	end
-	
-	unloading = false
-end
-
-function acrexttMenu:updateInput(bindName : string, newBind : Enum)
-	if not bindName or not newBind then
-		warn(`bindName or newBind parameter not given.`)
-		return
-	end
-
-	if default_keybinds[bindName] then
-		default_keybinds[bindName] = newBind
-	else
-		warn(`Failed to set {newBind} bind {bindName} doesn't exist in keybinds.`)
-	end
-end
-
 function acrexttMenu:init()
 	if PlayerGui:FindFirstChild("AcrexttMenu") then
 		return
@@ -783,7 +752,7 @@ function acrexttMenu:init()
 
 	local CloseButton = Instance.new("TextButton")
 	CloseButton.Name = "CloseButton"
-	CloseButton.Text = "?"
+	CloseButton.Text = "X"
 	CloseButton.Size = UDim2.new(0, 32, 0, 32)
 	CloseButton.Position = UDim2.new(1, -37, 0.5, -16)
 	CloseButton.BackgroundColor3 = Color3.fromRGB(40, 20, 60)
@@ -872,7 +841,7 @@ function acrexttMenu:init()
 	ContentPadding.PaddingTop = UDim.new(0, 8)
 	ContentPadding.PaddingBottom = UDim.new(0, 8)
 	ContentPadding.Parent = ScrollFrame
-	
+
 	local dragging = false
 	local dragInput, dragStart, startPos
 
@@ -907,14 +876,6 @@ function acrexttMenu:init()
 		end
 	end)
 
-	connections.Close = CloseButton.MouseButton1Click:Connect(function()
-		tween(CloseButton, {Size = UDim2.new(0, 28, 0, 28), Position = UDim2.new(1, -35, 0.5, -14)}, 0.1)
-		task.wait(0.1)
-		MainGui.Enabled = false
-		isMenuOpen = false
-		tween(CloseButton, {Size = UDim2.new(0, 32, 0, 32), Position = UDim2.new(1, -37, 0.5, -16)}, 0.1)
-	end)
-
 	connections.CloseEnter = CloseButton.MouseEnter:Connect(function()
 		tween(CloseButton, {BackgroundColor3 = Color3.fromRGB(50, 25, 80)}, 0.2)
 	end)
@@ -922,14 +883,6 @@ function acrexttMenu:init()
 	connections.CloseLeave = CloseButton.MouseLeave:Connect(function()
 		tween(CloseButton, {BackgroundColor3 = Color3.fromRGB(40, 20, 60)}, 0.2)
 	end)
-
-	connections.DoBeforeGuiIsDestroyed = MainGui.Destroying:Connect(function()
-		clearConnections()
-	end)
 end
 
 return acrexttMenu
-
-
-
-
