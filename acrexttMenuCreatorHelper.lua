@@ -670,21 +670,6 @@ function acrexttMenu:unload(reinitialize : boolean)
 	unloading = false
 end
 
-function acrexttMenu:toggleMenu()
-	local hub = PlayerGui:FindFirstChild("AcrexttMenu")
-	if isMenuOpen then
-		if hub then
-			hub.Enabled = false
-			isMenuOpen = false
-		end
-	else
-		if hub then
-			hub.Enabled = true
-			isMenuOpen = true
-		end
-	end
-end
-
 function acrexttMenu:updateInput(bindName : string, newBind : Enum)
 	if not bindName or not newBind then
 		warn(`bindName or newBind parameter not given.`)
@@ -946,5 +931,6 @@ function acrexttMenu:init()
 end
 
 return acrexttMenu
+
 
 
