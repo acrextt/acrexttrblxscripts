@@ -25,7 +25,7 @@ end
 local acrexttNotifier = {}
 
 local function getNotificationsContainer()
-	if NotificationsContainer and NotificationsContainer.Parent then
+	if NotificationsContainer and NotificationsContainer.Parent or PlayerGui:FindFirstChild("AcrexttNotifications") then
 		return NotificationsContainer
 	end
 	
@@ -328,4 +328,5 @@ function acrexttNotifier:notifyError(message, duration)
 end
 
 return acrexttNotifier
+
 
