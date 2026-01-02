@@ -299,8 +299,6 @@ local function notify(message, duration, notificationType)
 			else
 				progressbar.BackgroundColor3 = typeColors[notificationType] or typeColors.info
 			end
-
-			task.wait(0.033)
 		end
 
 		if Notification.Parent then
@@ -328,6 +326,7 @@ function acrexttNotifier:notifyError(message, duration)
 end
 
 return acrexttNotifier
+
 
 
 
