@@ -6,8 +6,6 @@ local UserInputService = game:GetService("UserInputService")
 local Player = Players.LocalPlayer
 local PlayerGui = Player.PlayerGui
 
-local acrexttNotifier = loadstring(game:HttpGet("https://raw.githubusercontent.com/acrextt/acrexttNotifier/refs/heads/main/acrexttNotifier.lua"))()
-
 local unloading = false
 local isMenuOpen = false
 local currentConfiguration = nil
@@ -660,14 +658,13 @@ function acrexttMenu:unload(reinitialize : boolean)
 	if unloading then return end
 	unloading = true
 	if PlayerGui:FindFirstChild("AcrexttMenu") then
-		acrexttConfigurator:saveConfiguration(currentConfiguration)
 		PlayerGui:FindFirstChild("AcrexttMenu"):Destroy()
 		isMenuOpen = false
 		if reinitialize then
 			acrexttMenu:init()
 		end
 	else
-		acrexttNotifier:notifyError(`Failed to unload acrextt menu.`, 4)
+		warn(`Failed to unload AcrexttMenu`)
 	end
 	
 	unloading = false
@@ -679,24 +676,18 @@ function acrexttMenu:toggleMenu()
 		if hub then
 			hub.Enabled = false
 			isMenuOpen = false
-			acrexttNotifier:notifyInfo("Closed interface.", 1)
-		else
-			acrexttNotifier:notifyWarning("Failed to close interface.", 2)
 		end
 	else
 		if hub then
 			hub.Enabled = true
 			isMenuOpen = true
-			acrexttNotifier:notifyInfo("Opened interface.", 1)
-		else
-			acrexttNotifier:notifyWarning("Failed to open interface.", 2)
 		end
 	end
 end
 
 function acrexttMenu:updateInput(bindName : string, newBind : Enum)
 	if not bindName or not newBind then
-		acrexttNotifier:notifyWarning(`bindName or newBind variable not given.`, 2)
+		warn(`bindName or newBind parameter not given.`)
 		return
 	end
 
@@ -709,7 +700,6 @@ end
 
 function acrexttMenu:init()
 	if PlayerGui:FindFirstChild("AcrexttMenu") then
-		acrexttNotifier:notifyWarning(`Your trying to initialize when acrextt menu exists already. Press delete to unload menu and reinitialize.`, 3)
 		return
 	end
 
@@ -940,7 +930,6 @@ function acrexttMenu:init()
 		MainGui.Enabled = false
 		isMenuOpen = false
 		tween(CloseButton, {Size = UDim2.new(0, 32, 0, 32), Position = UDim2.new(1, -37, 0.5, -16)}, 0.1)
-		acrexttNotifier:notifyInfo("Closed interface", 1)
 	end)
 
 	connections.CloseEnter = CloseButton.MouseEnter:Connect(function()
@@ -954,9 +943,8 @@ function acrexttMenu:init()
 	connections.DoBeforeGuiIsDestroyed = MainGui.Destroying:Connect(function()
 		clearConnections()
 	end)
-	
-	acrexttNotifier:notifySuccess("Acrextt Menu initialized!", 2)
 end
 
 return acrexttMenu
+
 
