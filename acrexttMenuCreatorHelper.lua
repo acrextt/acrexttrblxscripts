@@ -6,13 +6,7 @@ local UserInputService = game:GetService("UserInputService")
 local Player = Players.LocalPlayer
 local PlayerGui = Player.PlayerGui
 
-local HTTPLOADSTRINGLINKS = {
-	"https://raw.githubusercontent.com/acrextt/acrexttNotifier/refs/heads/main/acrexttNotifier.lua",
-	"https://raw.githubusercontent.com/acrextt/acrexttrblxscripts/refs/heads/main/acrexttConfiguration.lua"
-}
-
-local acrexttNotifier = loadstring(game:HttpGet(HTTPLOADSTRINGLINKS[1]))()
-local acrexttConfigurator = loadstring(game:HttpGet(HTTPLOADSTRINGLINKS[2]))()
+local acrexttNotifier = loadstring(game:HttpGet("https://raw.githubusercontent.com/acrextt/acrexttNotifier/refs/heads/main/acrexttNotifier.lua"))()
 
 local unloading = false
 local isMenuOpen = false
@@ -20,10 +14,6 @@ local currentConfiguration = nil
 
 local acrexttMenu = {}
 local connections = {}
-
-local default_keybinds = {
-	openHubInput = Enum.KeyCode.Insert
-}
 
 local function clearConnections()
 	for _, connection in connections do
@@ -961,12 +951,6 @@ function acrexttMenu:init()
 		tween(CloseButton, {BackgroundColor3 = Color3.fromRGB(40, 20, 60)}, 0.2)
 	end)
 
-	connections.createInputs = UserInputService.InputBegan:Connect(function(i, gpe)
-		if i.KeyCode == default_keybinds.openHubInput or i.UserInputType == default_keybinds.openHubInput then
-			acrexttMenu:toggleMenu()
-		end
-	end)
-
 	connections.DoBeforeGuiIsDestroyed = MainGui.Destroying:Connect(function()
 		clearConnections()
 	end)
@@ -975,3 +959,4 @@ function acrexttMenu:init()
 end
 
 return acrexttMenu
+
