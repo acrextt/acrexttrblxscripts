@@ -89,24 +89,25 @@ local function deleteConfigFile(configName : string) : boolean
 end
 
 local function listConfigFiles()
-	local configs = {}
-	if listfiles then
-		local files = listfiles("")
-		local prefix = getConfigKey() .. "_"
-		local suffix = ".json"
-		
-		for _, file in ipairs(files) do
-			if string.find(file, "^" .. prefix) and string.find(file, suffix .. "$") then
-				local configName = string.gsub(file, prefix, "")
-				configName = string.gsub(configName, suffix .. "$", "")
-				
-				if configName ~= "_lastLoaded" then
-					table.insert(configs, configName)
-				end
-			end
-		end
-	end
-	return configs
+    local configs = {}
+    if listfiles then
+        local files = listfiles("")
+        local prefix = getConfigKey() .. "_"
+        local suffix = ".json"
+        
+        for _, file in ipairs(files) do
+            if string.find(file, "^" .. prefix) and string.find(file, suffix .. "$") then
+                local fileName = string.match(file, "[^\\/]+$")  -- Extract just filename
+                local configName = string.gsub(fileName, prefix, "")
+                configName = string.gsub(configName, suffix .. "$", "")
+                
+                if configName ~= "_lastLoaded" then
+                    table.insert(configs, configName)
+                end
+            end
+        end
+    end
+    return configs
 end
 
 local function createDefaultConfig(configName : string)
@@ -249,41 +250,49 @@ function acrexttConfigurationManager:loadConfiguration(specificConfiguration : s
 end
 
 function acrexttConfigurationManager:loadConfigurations() : any
-	local allConfigs = {}
-	local configNames = listConfigFiles()
-	
-	print("[ConfigManager] Found " .. #configNames .. " configuration files")
-	
-	for _, configName in ipairs(configNames) do
-		local config = loadConfigFromFile(configName)
-		if config then
-			print("[ConfigManager] Loaded config: " .. configName)
-			table.insert(allConfigs, config)
-		else
-			print("[ConfigManager] Failed to load config: " .. configName)
-		end
-	end
-	
-	local hasDefault = false
-	for _, config in ipairs(allConfigs) do
-		if config.name == "default" then
-			hasDefault = true
-			break
-		end
-	end
-	
-	if #allConfigs == 0 or not hasDefault then
-		print("[ConfigManager] Creating default configuration")
-		local defaultConfig = createDefaultConfig("default")
-		saveConfigToFile("default", defaultConfig)
-		table.insert(allConfigs, defaultConfig)
-	end
-	
-	table.sort(allConfigs, function(a, b)
-		return (a.lastModified or 0) > (b.lastModified or 0)
-	end)
-	
-	return allConfigs
+    print("[ConfigManager] Loading ALL configurations...")
+    local allConfigs = {}
+    local configNames = listConfigFiles()
+    
+    print("[ConfigManager] Found " .. #configNames .. " configuration files")
+    
+    for i, configName in ipairs(configNames) do
+        print("[ConfigManager] Attempting to load config " .. i .. ": " .. configName)
+        local config = loadConfigFromFile(configName)
+        if config then
+            print("[ConfigManager] ✓ Successfully loaded: " .. configName)
+            table.insert(allConfigs, config)
+        else
+            print("[ConfigManager] ✗ Failed to load: " .. configName)
+        end
+    end
+    
+    local hasDefault = false
+    for _, config in ipairs(allConfigs) do
+        if config.name == "default" then
+            hasDefault = true
+            break
+        end
+    end
+    
+    if #allConfigs == 0 or not hasDefault then
+        print("[ConfigManager] Creating default configuration")
+        local defaultConfig = createDefaultConfig("default")
+        saveConfigToFile("default", defaultConfig)
+        table.insert(allConfigs, defaultConfig)
+    end
+    
+    table.sort(allConfigs, function(a, b)
+        return (a.lastModified or 0) > (b.lastModified or 0)
+    end)
+    
+    print("[ConfigManager] Final configuration count: " .. #allConfigs)
+    for i, config in ipairs(allConfigs) do
+        print("[ConfigManager]   " .. i .. ": " .. config.name .. 
+              " (Modified: " .. os.date("%H:%M:%S", config.lastModified) .. ")")
+    end
+    
+    return allConfigs
 end
 
 function acrexttConfigurationManager:resetConfiguration(specificConfiguration : string)
@@ -298,37 +307,60 @@ end
 
 function acrexttConfigurationManager:saveConfiguration(configuration : any) : any
     if not configuration then
-        warn(`Can't save configuration is nil?`)
+        warn(`[ConfigManager] Can't save configuration is nil?`)
         return false
     end
-    
+
     local configName = configuration.name or "default"
-    local configData = configuration.data or configuration
+    
+    print("[ConfigManager] Saving configuration: " .. configName)
+    print("[ConfigManager] Configuration structure:")
+    print("[ConfigManager] - Name: " .. tostring(configuration.name))
+    print("[ConfigManager] - Created: " .. tostring(configuration.createdAt))
+    print("[ConfigManager] - Modified: " .. tostring(configuration.lastModified))
     
     local configToSave = {
         name = configName,
         createdAt = configuration.createdAt or os.time(),
         lastModified = os.time(),
-        data = configData
+        data = configuration.data or {}
     }
-    
+
     if not self:validateConfiguration(configToSave) then
-        warn("Invalid configuration structure")
+        warn("[ConfigManager] Invalid configuration structure")
         return false
     end
-    
+
     local existingConfigs = listConfigFiles()
-    if #existingConfigs >= maxConfigurations and not table.find(existingConfigs, configName) then
-        warn(`Maximum configurations (${maxConfigurations}) reached. Delete one before saving.`)
-        return false
+    print("[ConfigManager] Existing configs: " .. tostring(#existingConfigs))
+    for i, name in ipairs(existingConfigs) do
+        print("[ConfigManager]   " .. i .. ": " .. name)
     end
     
+    local configExists = false
+    for _, existingName in ipairs(existingConfigs) do
+        if existingName == configName then
+            configExists = true
+            print("[ConfigManager] Config '" .. configName .. "' already exists!")
+            break
+        end
+    end
+    
+    if not configExists and #existingConfigs >= maxConfigurations then
+        warn(`[ConfigManager] Maximum configurations (${maxConfigurations}) reached.`)
+        return false
+    end
+
     local success = saveConfigToFile(configName, configToSave)
     
     if success then
-        self:setLastLoadedConfiguration(configName, configData)
+        print("[ConfigManager] Save successful for: " .. configName)
+        self:setLastLoadedConfiguration(configName, configToSave.data)
+        self:loadConfigurations()
+    else
+        print("[ConfigManager] Save failed for: " .. configName)
     end
-    
+
     return success
 end
 
@@ -540,5 +572,6 @@ end
 
 
 return acrexttConfigurationManager
+
 
 
