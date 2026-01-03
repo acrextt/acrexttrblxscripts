@@ -332,17 +332,47 @@ function acrexttConfigurationManager:saveConfiguration(configuration : any) : an
     return success
 end
 
-function acrexttConfigurationManager:saveConfigurations(configurations : any)
-	if not configurations then
-		warn(`No configurations provided to save.`)
+function acrexttConfigurationManager:saveConfiguration(configuration : any) : any
+	if not configuration then
+		warn(`[ConfigManager] Can't save configuration is nil?`)
 		return false
 	end
 
-	local success = true
-	for _, config in ipairs(configurations) do
-		if not self:saveConfiguration(config) then
-			success = false
-		end
+	local configName = configuration.name or "default"
+	
+	print("[ConfigManager] Saving configuration: " .. configName)
+	print("[ConfigManager] Configuration structure:")
+	print("[ConfigManager] - Name: " .. tostring(configuration.name))
+	print("[ConfigManager] - Created: " .. tostring(configuration.createdAt))
+	print("[ConfigManager] - Modified: " .. tostring(configuration.lastModified))
+	
+	local configToSave = {
+		name = configName,
+		createdAt = configuration.createdAt or os.time(),
+		lastModified = os.time(),
+		data = configuration.data or {}
+	}
+
+	if not self:validateConfiguration(configToSave) then
+		warn("[ConfigManager] Invalid configuration structure")
+		return false
+	end
+
+	local existingConfigs = listConfigFiles()
+	print("[ConfigManager] Existing configs: " .. tostring(#existingConfigs))
+	
+	if #existingConfigs >= maxConfigurations and not table.find(existingConfigs, configName) then
+		warn(`[ConfigManager] Maximum configurations (${maxConfigurations}) reached.`)
+		return false
+	end
+
+	local success = saveConfigToFile(configName, configToSave)
+	
+	if success then
+		print("[ConfigManager] Save successful for: " .. configName)
+		self:setLastLoadedConfiguration(configName, configToSave.data)
+	else
+		print("[ConfigManager] Save failed for: " .. configName)
 	end
 
 	return success
@@ -510,4 +540,5 @@ end
 
 
 return acrexttConfigurationManager
+
 
