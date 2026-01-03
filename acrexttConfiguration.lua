@@ -93,11 +93,16 @@ local function listConfigFiles()
 	if listfiles then
 		local files = listfiles("")
 		local prefix = getConfigKey() .. "_"
+		local suffix = ".json"
+		
 		for _, file in ipairs(files) do
-			if string.find(file, prefix) then
+			if string.find(file, "^" .. prefix) and string.find(file, suffix .. "$") then
 				local configName = string.gsub(file, prefix, "")
-				configName = string.gsub(configName, "%.json$", "")
-				table.insert(configs, configName)
+				configName = string.gsub(configName, suffix .. "$", "")
+				
+				if configName ~= "_lastLoaded" then
+					table.insert(configs, configName)
+				end
 			end
 		end
 	end
@@ -246,20 +251,38 @@ end
 function acrexttConfigurationManager:loadConfigurations() : any
 	local allConfigs = {}
 	local configNames = listConfigFiles()
-
+	
+	print("[ConfigManager] Found " .. #configNames .. " configuration files")
+	
 	for _, configName in ipairs(configNames) do
 		local config = loadConfigFromFile(configName)
 		if config then
+			print("[ConfigManager] Loaded config: " .. configName)
 			table.insert(allConfigs, config)
+		else
+			print("[ConfigManager] Failed to load config: " .. configName)
 		end
 	end
-
-	if #allConfigs == 0 then
+	
+	local hasDefault = false
+	for _, config in ipairs(allConfigs) do
+		if config.name == "default" then
+			hasDefault = true
+			break
+		end
+	end
+	
+	if #allConfigs == 0 or not hasDefault then
+		print("[ConfigManager] Creating default configuration")
 		local defaultConfig = createDefaultConfig("default")
 		saveConfigToFile("default", defaultConfig)
 		table.insert(allConfigs, defaultConfig)
 	end
-
+	
+	table.sort(allConfigs, function(a, b)
+		return (a.lastModified or 0) > (b.lastModified or 0)
+	end)
+	
 	return allConfigs
 end
 
@@ -487,3 +510,4 @@ end
 
 
 return acrexttConfigurationManager
+
