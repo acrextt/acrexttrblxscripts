@@ -24,6 +24,7 @@ local configurationTemplate = {
         
         -- Aim
         AimbotEnabled = false,
+		AimbotHoldEnabled = false,
         AimbotFOV = 100,
         AimbotSmoothness = 0.12,
         aimbotPart = "Head",
@@ -572,6 +573,7 @@ end
 
 
 return acrexttConfigurationManager
+
 
 
 
